@@ -9,13 +9,17 @@ public class Pointer{
     public int target {
         get => _target;
     }
-    public Pointer(int baseAddress, byte[] rawPointer){
+    public Pointer(int baseAddress, BinaryReader br, int size){
         this.baseAddress = baseAddress;
-        List<byte> temp = new List<byte>(rawPointer);
+        List<byte> temp = new List<byte>();
+        for (int i = 0; i < size; i++){
+            temp.Add(br.ReadByte());
+        }
         while (temp.Count < 4){
             temp.Add(0x00);
         }
-        rawPointer = temp.ToArray();
+        
+        var rawPointer = temp.ToArray();
         // Make sure the conversion works on Big Endian systems
         if (!BitConverter.IsLittleEndian) Array.Reverse(rawPointer);
         int pointer = BitConverter.ToInt32(rawPointer);
