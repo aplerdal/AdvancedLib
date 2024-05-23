@@ -6,14 +6,9 @@ namespace AdvancedLib.Tests.Serialize;
 public class PointerTest
 {
     [Fact]
-    public void PointerTest_i32()
-    {
-        Pointer pntr = new Pointer(0x1D3A7F, new byte[] {0xA3,0x37,0x4F,0x02});
-        Assert.Equal(0x1D3A7F + 0x024F37A3, pntr.target);
-    }
-    [Fact]
-    public void PointerTest_i16(){
-        Pointer pntr = new Pointer(0x1D3A7F, new byte[] {0xA3,0x37});
-        Assert.Equal(0x1D3A7F + 0x37A3, pntr.target);
+    public void Test(){
+        MemoryStream stream = new MemoryStream(new byte[]{0x18,0x93,0x84,0xf0,0x5a});
+        BinaryReader br = new BinaryReader(stream);
+        Assert.Equal("a",$"{br.ReadUInt32():X}");
     }
 }

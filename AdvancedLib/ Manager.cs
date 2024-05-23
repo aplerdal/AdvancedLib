@@ -9,8 +9,8 @@ Raw (usually) refers to the binary form of something
 namespace AdvancedLib;
 public class Manager
 {
-    FileStream? rom;
-
+    FileStream? romStream;
+    BinaryReader? romReader;
     public Manager() {}
 
     /// <summary>
@@ -26,7 +26,8 @@ public class Manager
                 Share = FileShare.ReadWrite,
             };
             
-            rom = File.Open(path, options);
+            romStream = File.Open(path, options);
+            romReader = new BinaryReader(romStream);
             return true;
         } catch (Exception e) {
             #if DEBUG
@@ -39,8 +40,8 @@ public class Manager
     /// Close reference to ROM
     /// </summary>
     public void Close(){
-        if (rom is not null)
-            rom.Close();
+        if (romStream is not null)
+            romStream.Close();
     }
     /// <summary>
     /// Decompress entire ROM
