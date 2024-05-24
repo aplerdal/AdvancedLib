@@ -4,8 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BinarySerializer;
+using BinarySerializer.GBA;
 
-namespace AdvancedLib.Track
+namespace AdvancedLib.Serialize
 {
     public class Track : BinarySerializable
     {
@@ -16,7 +17,7 @@ namespace AdvancedLib.Track
         uint tileLookback {get; set;}
         Pointer trackLayoutPointer {get; set;}
         Pointer tilesetPartsPointer { get; set; }
-        Pointer[] tilesetParts {get; set;}
+        Pointer[] tilesetPartPointers {get; set;}
         Pointer palettePointer {get; set;}
         Pointer tileBehaviorsPointer {get; set;}
         Pointer objectsPointer {get; set;}
@@ -29,6 +30,9 @@ namespace AdvancedLib.Track
         Pointer aiZonesPointer {get; set;}
         Pointer objectGfxPointer {get; set;}
         Pointer objectPalettePointer {get; set;}
+
+        // Decompressed Values
+        TilesetPart[] tilesetParts {get; set;}
         
 
         #pragma warning enable
@@ -62,9 +66,14 @@ namespace AdvancedLib.Track
             s.SerializePadding(20);
 
             s.DoAt(tilesetPartsPointer, () => {
-                s.SerializePointerArray(tilesetParts,4,PointerSize.Pointer16, tilesetPartsPointer, name: nameof(tilesetParts));
+                s.SerializePointerArray(tilesetPartPointers,4,PointerSize.Pointer16, tilesetPartsPointer, name: nameof(tilesetPartPointers));
+                for (int i = 0; i< tilesetPartPointers.Length; i++){
+                    s.DoAtEncoded(tilesetPartPointers[i], new LZSSEncoder(), () => {
+                        tilesetParts[i] = new TilesetPart();
+                        tilesetParts[i].SerializeImpl(s);
+                    });
+                }
             });
-            
         }
     }
 }

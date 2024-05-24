@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace AdvancedEdit.Compression
+namespace AdvancedLib.Compression
 {
     static class LZ77
     {

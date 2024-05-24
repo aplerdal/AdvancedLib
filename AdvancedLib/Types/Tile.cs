@@ -1,3 +1,5 @@
+using BinarySerializer;
+
 namespace AdvancedLib.Types {
     public class Tile
     {
