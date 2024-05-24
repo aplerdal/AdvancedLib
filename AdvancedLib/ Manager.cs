@@ -1,17 +1,31 @@
 ﻿using System.IO;
+using BinarySerializer;
+using BinarySerializer.GBA;
 
 /*
 Notes:
 Raw (usually) refers to the binary form of something
 */
 
-
 namespace AdvancedLib;
 public class Manager
 {
     FileStream? romStream;
     BinaryReader? romReader;
-    public Manager() {}
+    Context context = new Context("");
+
+    Region region;
+
+    ROMHeader header = new ROMHeader();
+
+    public Manager() {
+        context.AddPreDefinedPointers(new Dictionary<Region, long>()
+        {
+            [Region.USA] = 0x258000,
+            [Region.JPN] = 0x258000, // Unknown
+            [Region.PAL] = 0x258000, // Unknown
+        });
+    }
 
     /// <summary>
     /// Opens filestream to 
@@ -19,22 +33,26 @@ public class Manager
     /// <param name="path">Path the file</param>
     /// <returns>Open was a success?</returns>
     public bool Open(string path){
-        if (!File.Exists(path)) return false;
-        try {
-            var options = new FileStreamOptions(){
-                Access = FileAccess.ReadWrite,
-                Share = FileShare.ReadWrite,
-            };
-            
-            romStream = File.Open(path, options);
-            romReader = new BinaryReader(romStream);
-            return true;
-        } catch (Exception e) {
-            #if DEBUG
-            Console.WriteLine(e);
-            #endif
-            return false;
+        context.AddFile(new LinearFile(context, path, Endian.Little));
+
+        BinaryDeserializer s = new BinaryDeserializer(context);
+
+        header.SerializeImpl(s);
+        switch (header.GameCode)
+        {
+            case "AMKE":
+                region = Region.USA;
+                return true;
+            case "AMKJ":
+                region = Region.JPN;
+                return true;
+            case "AMKP":
+                region = Region.PAL;
+                return true;
+            default:
+                return false;
         }
+
     }
     /// <summary>
     /// Close reference to ROM
@@ -56,4 +74,11 @@ public class Manager
     public void Decompress(ref float progress){
         
     }
+}
+
+public enum Region
+{
+    USA,
+    JPN,
+    PAL,
 }

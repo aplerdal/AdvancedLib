@@ -7,4 +7,9 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\BinarySerializer.Nintendo\BinarySerializer.GBA.csproj" />
+    <ProjectReference Include="..\BinarySerializer\BinarySerializer.csproj" />
+  </ItemGroup>
+
 </Project>
