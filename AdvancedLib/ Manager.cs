@@ -14,7 +14,7 @@ public class Manager
     BinaryReader? romReader;
     Context context = new Context("");
 
-    Region region;
+    public static Region region;
 
     ROMHeader header = new ROMHeader();
 
@@ -52,6 +52,7 @@ public class Manager
             default:
                 return false;
         }
+
 
     }
     /// <summary>

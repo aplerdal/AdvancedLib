@@ -6,74 +6,92 @@ using System.Threading.Tasks;
 using BinarySerializer;
 using BinarySerializer.GBA;
 
-namespace AdvancedLib.Serialize
+namespace AdvancedLib.Serialize;
+
+public class TrackManager : BinarySerializable
 {
-    public class Track : BinarySerializable
+    Track[] tracks { get; set; }
+    public override void SerializeImpl(SerializerObject s)
     {
-        #pragma warning disable
-        uint magic;
-        byte trackWidth {get; set;}
-        byte trackHeight {get; set;}
-        uint tileLookback {get; set;}
-        Pointer trackLayoutPointer {get; set;}
-        Pointer tilesetPartsPointer { get; set; }
-        Pointer[] tilesetPartPointers {get; set;}
-        Pointer palettePointer {get; set;}
-        Pointer tileBehaviorsPointer {get; set;}
-        Pointer objectsPointer {get; set;}
-        Pointer overlayPointer {get; set;}
-        Pointer itemBoxPointer {get; set;}
-        Pointer finishLinePointer {get; set;}
-        uint data0;
-        uint trackRoutine {get; set;}
-        Pointer minimapPointer {get; set;}
-        Pointer aiZonesPointer {get; set;}
-        Pointer objectGfxPointer {get; set;}
-        Pointer objectPalettePointer {get; set;}
 
-        // Decompressed Values
-        TilesetPart[] tilesetParts {get; set;}
+    }
+}
+
+public class Track : BinarySerializable
+{
+    #pragma warning disable
+    uint magic;
+    byte trackWidth { get; set; }
+    byte trackHeight { get; set; }
+    uint tileLookback { get; set; }
+    Pointer layoutPointers { get; set; }
+    Pointer tilesetPartsPointer { get; set; }
+    Pointer[] tilesetPartPointers { get; set; }
+    Pointer palettePointer { get; set; }
+    Pointer tileBehaviorsPointer { get; set; }
+    Pointer objectsPointer { get; set; }
+    Pointer overlayPointer { get; set; }
+    Pointer itemBoxPointer { get; set; }
+    Pointer finishLinePointer { get; set; }
+    uint data0;
+    uint trackRoutine { get; set; }
+    Pointer minimapPointer { get; set; }
+    Pointer aiZonesPointer { get; set; }
+    Pointer objectGfxPointer { get; set; }
+    Pointer objectPalettePointer { get; set; }
+
+    Tileset tileset { get; set; }
+    Layout layout { get; set; }
+
+
+#pragma warning enable
+    public override void SerializeImpl(SerializerObject s)
+    {
+        Pointer basePointer = s.CurrentPointer;
+        magic = s.Serialize<uint>(magic, nameof(magic));
+        trackWidth = s.Serialize<byte>(trackWidth, nameof(trackWidth));
+        trackHeight = s.Serialize<byte>(trackHeight, nameof(trackHeight));
+
+        s.SerializePadding(42);
         
+        tileLookback = s.Serialize<uint>(tileLookback,nameof(tileLookback));
 
-        #pragma warning enable
-        public override void SerializeImpl(SerializerObject s)
-        {
-            Pointer basePointer = s.CurrentPointer;
-            s.Serialize<uint>(magic, nameof(magic));
-            s.Serialize<byte>(trackWidth, nameof(trackWidth));
-            s.Serialize<byte>(trackHeight, nameof(trackHeight));
-            s.SerializePadding(42);
-            s.Serialize<uint>(tileLookback,nameof(tileLookback));
-            s.SerializePadding(12);
-            s.SerializePointer(trackLayoutPointer, PointerSize.Pointer32, basePointer);
-            s.SerializePadding(60);
-            s.SerializePointer(tilesetPartsPointer, PointerSize.Pointer32, basePointer);
-            s.SerializePointer(palettePointer, PointerSize.Pointer32, basePointer, name: nameof(palettePointer));
-            s.SerializePointer(tileBehaviorsPointer, PointerSize.Pointer32, basePointer, name: nameof(tileBehaviorsPointer));
-            s.SerializePointer(objectsPointer, PointerSize.Pointer32, basePointer, name: nameof(objectsPointer));
-            s.SerializePointer(overlayPointer, PointerSize.Pointer32, basePointer, name: nameof(overlayPointer));
-            s.SerializePointer(itemBoxPointer, PointerSize.Pointer32, basePointer, name: nameof(itemBoxPointer));
-            s.SerializePointer(finishLinePointer, PointerSize.Pointer32, basePointer, name: nameof(finishLinePointer));
-            s.Serialize<uint>(data0, name: nameof(data0));
-            s.SerializePadding(32);
-            s.Serialize<uint>(trackRoutine, nameof(trackRoutine));
-            s.SerializePointer(minimapPointer, PointerSize.Pointer32, basePointer, name: nameof(minimapPointer));
-            s.SerializePadding(4);
-            s.SerializePointer(aiZonesPointer, PointerSize.Pointer32, basePointer, name: nameof(aiZonesPointer));
-            s.SerializePadding(20);
-            s.SerializePointer(objectGfxPointer, PointerSize.Pointer32, basePointer, name: nameof(objectGfxPointer));
-            s.SerializePointer(objectPalettePointer, PointerSize.Pointer32, basePointer, name: nameof(objectPalettePointer));
-            s.SerializePadding(20);
+        s.SerializePadding(12);
+        
+        s.SerializePointer(layoutPointers, PointerSize.Pointer32, basePointer);
+        
+        s.SerializePadding(60);
 
-            s.DoAt(tilesetPartsPointer, () => {
-                s.SerializePointerArray(tilesetPartPointers,4,PointerSize.Pointer16, tilesetPartsPointer, name: nameof(tilesetPartPointers));
-                for (int i = 0; i< tilesetPartPointers.Length; i++){
-                    s.DoAtEncoded(tilesetPartPointers[i], new LZSSEncoder(), () => {
-                        tilesetParts[i] = new TilesetPart();
-                        tilesetParts[i].SerializeImpl(s);
-                    });
-                }
-            });
-        }
+        tilesetPartsPointer = s.SerializePointer(tilesetPartsPointer, PointerSize.Pointer32, basePointer);
+        palettePointer = s.SerializePointer(palettePointer, PointerSize.Pointer32, basePointer, name: nameof(palettePointer));
+        tileBehaviorsPointer = s.SerializePointer(tileBehaviorsPointer, PointerSize.Pointer32, basePointer, name: nameof(tileBehaviorsPointer));
+        objectsPointer = s.SerializePointer(objectsPointer, PointerSize.Pointer32, basePointer, name: nameof(objectsPointer));
+        overlayPointer = s.SerializePointer(overlayPointer, PointerSize.Pointer32, basePointer, name: nameof(overlayPointer));
+        overlayPointer = s.SerializePointer(overlayPointer, PointerSize.Pointer32, basePointer, name: nameof(itemBoxPointer));
+        finishLinePointer = s.SerializePointer(finishLinePointer, PointerSize.Pointer32, basePointer, name: nameof(finishLinePointer));
+        data0 = s.Serialize<uint>(data0, name: nameof(data0));
+        
+        s.SerializePadding(32);
+
+        trackRoutine = s.Serialize<uint>(trackRoutine, nameof(trackRoutine));
+        minimapPointer = s.SerializePointer(minimapPointer, PointerSize.Pointer32, basePointer, name: nameof(minimapPointer));
+        
+        s.SerializePadding(4);
+
+        aiZonesPointer = s.SerializePointer(aiZonesPointer, PointerSize.Pointer32, basePointer, name: nameof(aiZonesPointer));
+        
+        s.SerializePadding(20);
+
+        objectGfxPointer = s.SerializePointer(objectGfxPointer, PointerSize.Pointer32, basePointer, name: nameof(objectGfxPointer));
+        objectPalettePointer = s.SerializePointer(objectPalettePointer, PointerSize.Pointer32, basePointer, name: nameof(objectPalettePointer));
+        
+        s.SerializePadding(20);
+
+        s.DoAt(tilesetPartsPointer, () => {
+            tileset = s.SerializeObject<Tileset>(tileset, name: nameof(tileset));
+        });
+        s.DoAt(layoutPointers, ()=> { 
+            layout = s.SerializeObject<Layout>(layout, name: nameof(layout));
+        });
     }
 }
