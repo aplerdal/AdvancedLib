@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using AdvancedLib.Serialize;
 using BinarySerializer;
 using BinarySerializer.GBA;
 
@@ -10,20 +11,21 @@ Raw (usually) refers to the binary form of something
 namespace AdvancedLib;
 public class Manager
 {
-    FileStream? romStream;
-    BinaryReader? romReader;
-    Context context = new Context("");
+    LinearFile file;
+
+    Context context = new Context("", serializerLogger: new FileSerializerLogger("C:\\Users\\apler\\Downloads\\Log.txt"));
 
     public static Region region;
 
-    ROMHeader header = new ROMHeader();
-
+    ROMHeader header { get; set; }
+    TrackManager trackManager { get; set; }
+    
     public Manager() {
         context.AddPreDefinedPointers(new Dictionary<Region, long>()
         {
-            [Region.USA] = 0x258000,
-            [Region.JPN] = 0x258000, // Unknown
-            [Region.PAL] = 0x258000, // Unknown
+            [Region.USA] = 0x258000, 
+            [Region.JPN] = 0x258000, // Should be correct, not tested
+            [Region.PAL] = 0x258000, // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
         });
     }
 
@@ -33,47 +35,52 @@ public class Manager
     /// <param name="path">Path the file</param>
     /// <returns>Open was a success?</returns>
     public bool Open(string path){
-        context.AddFile(new LinearFile(context, path, Endian.Little));
+        file = new LinearFile(context, path, Endian.Little);
+        context.AddFile(file);
 
         BinaryDeserializer s = new BinaryDeserializer(context);
 
-        header.SerializeImpl(s);
+        s.Goto(new Pointer(0, file));
+
+        header = s.SerializeObject<ROMHeader>(header, name: nameof(header));
         switch (header.GameCode)
         {
             case "AMKE":
                 region = Region.USA;
-                return true;
+                break;
             case "AMKJ":
                 region = Region.JPN;
-                return true;
+                break;
             case "AMKP":
                 region = Region.PAL;
-                return true;
+                break;
             default:
                 return false;
         }
 
+       
 
-    }
-    /// <summary>
-    /// Close reference to ROM
-    /// </summary>
-    public void Close(){
-        if (romStream is not null)
-            romStream.Close();
+        return true;
     }
     /// <summary>
     /// Decompress entire ROM
     /// </summary>
-    public void Decompress(){
+    public void Deserialize(){
+        BinaryDeserializer s = new BinaryDeserializer(context);
 
+        s.Goto(new Pointer(0, file));
+
+        trackManager = s.SerializeObject<TrackManager>(trackManager, name: nameof(trackManager));
     }
     /// <summary>
-    /// Decompress entire ROM and output current progress in `progress`
+    /// Reserialize entire ROM
     /// </summary>
-    /// <param name="progress">0.0-1.0</param>
-    public void Decompress(ref float progress){
-        
+    public void Reserialize(){
+        BinarySerializer.BinarySerializer s = new BinarySerializer.BinarySerializer(context);
+
+        s.Goto(new Pointer(0, file));
+
+        trackManager = s.SerializeObject<TrackManager>(trackManager, name: nameof(trackManager));
     }
 }
 

@@ -8,15 +8,6 @@ using BinarySerializer.GBA;
 
 namespace AdvancedLib.Serialize;
 
-public class TrackManager : BinarySerializable
-{
-    Track[] tracks { get; set; }
-    public override void SerializeImpl(SerializerObject s)
-    {
-
-    }
-}
-
 public class Track : BinarySerializable
 {
     #pragma warning disable
@@ -58,11 +49,11 @@ public class Track : BinarySerializable
 
         s.SerializePadding(12);
         
-        s.SerializePointer(layoutPointers, PointerSize.Pointer32, basePointer);
+        s.SerializePointer(layoutPointers, PointerSize.Pointer32, basePointer, name: nameof(layoutPointers));
         
         s.SerializePadding(60);
 
-        tilesetPartsPointer = s.SerializePointer(tilesetPartsPointer, PointerSize.Pointer32, basePointer);
+        tilesetPartsPointer = s.SerializePointer(tilesetPartsPointer, PointerSize.Pointer32, basePointer, name: nameof(tilesetPartPointers));
         palettePointer = s.SerializePointer(palettePointer, PointerSize.Pointer32, basePointer, name: nameof(palettePointer));
         tileBehaviorsPointer = s.SerializePointer(tileBehaviorsPointer, PointerSize.Pointer32, basePointer, name: nameof(tileBehaviorsPointer));
         objectsPointer = s.SerializePointer(objectsPointer, PointerSize.Pointer32, basePointer, name: nameof(objectsPointer));
@@ -87,9 +78,17 @@ public class Track : BinarySerializable
         
         s.SerializePadding(20);
 
-        s.DoAt(tilesetPartsPointer, () => {
-            tileset = s.SerializeObject<Tileset>(tileset, name: nameof(tileset));
-        });
+        // TODO: Implement tileset lookback
+        if (tilesetPartsPointer.AbsoluteOffset != palettePointer.AbsoluteOffset)
+        {
+            s.DoAt(tilesetPartsPointer, () =>
+            {
+                tileset = s.SerializeObject<Tileset>(tileset, name: nameof(tileset));
+            });
+        }
+        else { }
+        
+
         s.DoAt(layoutPointers, ()=> { 
             layout = s.SerializeObject<Layout>(layout, name: nameof(layout));
         });

@@ -22,11 +22,15 @@ class Tileset : BinarySerializable
             tileParts[2] = value[(4096 * 2)..(4096 * 3)];
             tileParts[3] = value[(4096 * 3)..(4096 * 4)];
         } }
+    long size { get {
+            this.RecalculateSize();
+            return this.SerializedSize;
+        } }
     byte[][] tileParts = new byte[4][];
     public override void SerializeImpl(SerializerObject s)
     {
         Pointer basePointer = s.CurrentPointer;
-        tilePointers = s.SerializePointerArray(tilePointers,4,PointerSize.Pointer16, basePointer);
+        tilePointers = s.SerializePointerArray(tilePointers,4,PointerSize.Pointer16, basePointer, name: nameof(tilePointers));
         for (int i = 0; i < tilePointers.Length; i++)
         {
             s.DoAtEncoded(tilePointers[i],new LZSSEncoder(), () => {
