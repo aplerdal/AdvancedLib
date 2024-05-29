@@ -11,8 +11,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BinarySerializer", "BinaryS
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BinarySerializer.GBA", "BinarySerializer.Nintendo\BinarySerializer.GBA.csproj", "{A3858CE4-34CF-4737-9ECB-A39A544F7388}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdvancedEdit", "AdvancedEdit\AdvancedEdit.csproj", "{D1A62EE7-A0E7-4F34-A651-E174352239B3}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
