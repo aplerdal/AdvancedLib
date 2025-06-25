@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Folder Include="Serialization\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="AuroraLib.Compression" Version="1.5.1" />
+      <PackageReference Include="AuroraLib.Core" Version="1.6.2" />
+    </ItemGroup>
+
+</Project>
